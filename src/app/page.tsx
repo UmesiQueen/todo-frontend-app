@@ -1,3 +1,6 @@
+"use client";
+
+import * as React from "react";
 import {
   EllipsisVerticalIcon,
   DotIcon,
@@ -6,8 +9,11 @@ import {
   CircleCheckBigIcon,
   PlusIcon,
   SearchIcon,
+  LoaderCircleIcon,
 } from "lucide-react";
 import { ModeToggle } from "@/components/toggle-theme";
+import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { v4 as uuidv4 } from "uuid";
 
 import {
   DropdownMenu,
@@ -26,46 +32,68 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-type Task = {
-  task_id: number;
+type TaskFormInput = {
   title: string;
-  project_title: string;
+  project_name: string;
   priority_level: "low" | "medium" | "high";
   status: "to-do" | "in-progress" | "done";
+};
+
+type Task = TaskFormInput & {
+  task_id: string;
   created_at: Date;
   updated_at?: Date;
 };
 
-const tasks: Task[] = [
-  {
-    task_id: 1,
-    title: "Implement user authentication system",
-    project_title: "SPR-1053",
-    priority_level: "high",
-    status: "in-progress",
-    created_at: new Date("2026-01-02T14:23:47"),
-  },
-  {
-    task_id: 2,
-    title: "Design dashboard UI mockups",
-    project_title: "SPR-1053",
-    priority_level: "medium",
-    status: "done",
-    created_at: new Date("2026-01-02T14:23:47"),
-  },
-  {
-    task_id: 3,
-    title: "Update documentation for new features",
-    project_title: "SPR-1053",
-    priority_level: "low",
-    status: "to-do",
-    created_at: new Date("2026-01-02T14:23:47"),
-    updated_at: new Date(),
-  },
-];
-
 export default function Home() {
+  const [tasks, setTasks] = React.useState<Task[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    setTasks(JSON.parse(localStorage.getItem("tasks") ?? "[]"));
+  }, []);
+
+  React.useEffect(() => {
+    if (tasks.length > 0) localStorage.setItem("tasks", JSON.stringify(tasks));
+  }, [tasks]);
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    reset,
+  } = useForm<TaskFormInput>();
+
+  const onSubmit: SubmitHandler<TaskFormInput> = (data) => {
+    setLoading(true);
+    const newTask: Task = {
+      task_id: `tk_${uuidv4().slice(0, 5)}`,
+      created_at: new Date(),
+      ...data,
+    };
+
+    setTimeout(() => {
+      setTasks((prev) => [...prev, newTask]);
+      setIsDialogOpen(false);
+      setLoading(false);
+      reset();
+    }, 500);
+  };
+
   return (
     <div className="min-h-screen bg-zinc-50 font-sans dark:bg-black">
       <header>
@@ -77,10 +105,133 @@ export default function Home() {
       <main className="px-5 max-w-250 mx-auto">
         <div className="space-y-5">
           {/* Create */}
-          <Button className="flex gap-2 items-center bg-sage hover:bg-sage/90 cursor-pointer ml-auto">
-            <PlusIcon />
-            Create
-          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="flex gap-2 items-center cursor-pointer ml-auto">
+                <PlusIcon />
+                Create
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-106.25 font-sans">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                <DialogHeader>
+                  <DialogTitle className="text-sage font-bold">
+                    Create new task
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 [&_label]:text-sage ">
+                  <div className="grid gap-3">
+                    <Label htmlFor="title">Title</Label>
+                    <Input
+                      id="title"
+                      placeholder="Task title..."
+                      maxLength={120}
+                      {...register("title", {
+                        required: "This field is required",
+                        max: {
+                          value: 120,
+                          message: "200 maximum chars exceeded",
+                        },
+                      })}
+                    />
+                    {errors.title && (
+                      <p className="text-xs text-red-500 -mt-1">
+                        {errors.title.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="grid gap-3">
+                    <Label htmlFor="project_name">Project Name</Label>
+                    <Input
+                      id="project_name"
+                      placeholder="eg. TalkSign"
+                      maxLength={40}
+                      {...register("project_name", {
+                        required: "This field is required",
+                        max: 40,
+                      })}
+                    />
+                    {errors.project_name && (
+                      <p className="text-xs text-red-500 -mt-1">
+                        {errors.project_name.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="md:flex gap-3">
+                    {/* Priority Level */}
+                    <div className="grid gap-3">
+                      <Label htmlFor="priority_level">Priority Level</Label>
+                      <Controller
+                        name="priority_level"
+                        control={control}
+                        rules={{ required: "This field is required" }}
+                        render={({ field }) => (
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <SelectTrigger id="priority_level" className="w-45">
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent className="font-sans">
+                              <SelectItem value="low">Low</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="high">High</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                      {errors.priority_level && (
+                        <p className="text-xs text-red-500 -mt-1">
+                          {errors.priority_level.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Status */}
+                    <div className="grid gap-3">
+                      <Label htmlFor="status">Status</Label>
+                      <Controller
+                        name="status"
+                        control={control}
+                        rules={{ required: "This field is required" }}
+                        render={({ field }) => (
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <SelectTrigger id="status" className="w-45">
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent className="font-sans">
+                              <SelectItem value="to-do">To-Do</SelectItem>
+                              <SelectItem value="in-progress">
+                                In-Progress
+                              </SelectItem>
+                              <SelectItem value="done">Done</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                      {errors.status && (
+                        <p className="text-xs text-red-500 -mt-1">
+                          {errors.status.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="outline">Cancel</Button>
+                  </DialogClose>
+                  <Button type="submit" disabled={loading} className="w-20">
+                    {loading ? <LoaderCircleIcon className="animate-spin" /> : "Add new"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
 
           <div className="flex gap-x-8 items-center h-10">
             {/* Search Bar*/}
@@ -125,13 +276,13 @@ export default function Home() {
   );
 }
 
-function TaskCard({ title, project_title, priority_level, status }: Task) {
+function TaskCard({ title, project_name, priority_level, status }: Task) {
   return (
     <div className="bg-pale-green/80 shadow-md rounded-lg p-6 w-full relative space-y-5">
       <div>
         <h3 className="text-xl font-semibold text-sage">{title}</h3>
         <p className="text-sm inline-flex items-center">
-          <span className="uppercase">{project_title}</span>{" "}
+          <span className="uppercase">{project_name}</span>{" "}
           <DotIcon size={20} /> Created 2 mins ago
         </p>
       </div>
