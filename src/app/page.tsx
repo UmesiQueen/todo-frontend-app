@@ -4,6 +4,8 @@ import {
   CircleDashedIcon,
   CircleIcon,
   CircleCheckBigIcon,
+  PlusIcon,
+  SearchIcon,
 } from "lucide-react";
 import { ModeToggle } from "@/components/toggle-theme";
 
@@ -16,6 +18,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 
 type Task = {
   task_id: number;
@@ -59,15 +69,52 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-zinc-50 font-sans dark:bg-black">
       <header>
-        <nav className="flex justify-between items-center gap-5 p-4">
+        <nav className="flex justify-between items-center gap-5 px-2 h-20 max-w-370 mx-auto">
           <h1 className="text-3xl font-bold text-sage">Sprint DashBoard</h1>
           <ModeToggle />
         </nav>
       </header>
       <main className="px-5 max-w-250 mx-auto">
-        <div>
+        <div className="space-y-5">
+          {/* Create */}
+          <Button className="flex gap-2 items-center bg-sage hover:bg-sage/90 cursor-pointer ml-auto">
+            <PlusIcon />
+            Create
+          </Button>
+
+          <div className="flex gap-x-8 items-center h-10">
+            {/* Search Bar*/}
+            <div className="h-10 w-85 bg-white p-3 border border-sage font-sans rounded-lg font-normal text-sm flex items-center gap-2">
+              <SearchIcon size={18} color="#5A7863" />
+              <input
+                type="text"
+                className="bg-transparent w-full focus:outline-none py-1"
+                placeholder="Search by title..."
+              />
+              <span className="sr-only">Search bar</span>
+            </div>
+            <Separator orientation="vertical" className="h-6! bg-sage" />
+            {/* Filter */}
+            <div className="flex items-center w-fit border border-sage font-medium rounded-lg bg-sage">
+              <span className="px-3 text-[13px] font-semibold h-full text-white">
+                {/* <ListFilterIcon size={15} /> */}
+                Filter by Status
+              </span>
+              <Select>
+                <SelectTrigger className="w-36 grow rounded-none rounded-r-lg border-0 border-l border-sage px-5 focus:ring-0 focus:ring-offset-0 bg-white">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent className="font-sans">
+                  <SelectItem value="#">All</SelectItem>
+                  <SelectItem value="to-do">To-do</SelectItem>
+                  <SelectItem value="in-progress">In-Progress</SelectItem>
+                  <SelectItem value="done">Done</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           {/* Tasks */}
-          <div className="mt-10 flex flex-col gap-3">
+          <div className="my-10 flex flex-col gap-3">
             {tasks.map((task) => (
               <TaskCard key={task.task_id} {...task} />
             ))}
@@ -99,7 +146,7 @@ function TaskCard({ title, project_title, priority_level, status }: Task) {
             <EllipsisVerticalIcon />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent>
+        <DropdownMenuContent className="font-sans">
           <DropdownMenuItem>Edit</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem className="text-red-500">Delete</DropdownMenuItem>
