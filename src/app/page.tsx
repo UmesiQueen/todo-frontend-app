@@ -37,6 +37,7 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -63,6 +64,7 @@ export default function Home() {
   const [tasks, setTasks] = React.useState<Task[]>([]);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [editingTask, setEditingTask] = React.useState<Task | null>(null);
 
   React.useEffect(() => {
     setTasks(JSON.parse(localStorage.getItem("tasks") ?? "[]"));
@@ -78,22 +80,46 @@ export default function Home() {
     control,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<TaskFormInput>();
 
   const onSubmit: SubmitHandler<TaskFormInput> = (data) => {
     setLoading(true);
-    const newTask: Task = {
-      task_id: `tk_${uuidv4().slice(0, 5)}`,
-      created_at: new Date(),
-      ...data,
-    };
+    if (editingTask) {
+      const updatedTask: Task = {
+        ...editingTask,
+        ...data,
+        updated_at: new Date(),
+      };
 
-    setTimeout(() => {
-      setTasks((prev) => [...prev, newTask]);
-      setIsDialogOpen(false);
-      setLoading(false);
-      reset();
-    }, 700);
+      setTimeout(() => {
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.task_id === editingTask.task_id ? updatedTask : task
+          )
+        );
+        setIsDialogOpen(false);
+        setLoading(false);
+        reset();
+
+        toast.success("Task updated successfully");
+      }, 700);
+    } else {
+      const newTask: Task = {
+        task_id: `tk_${uuidv4().slice(0, 5)}`,
+        created_at: new Date(),
+        ...data,
+      };
+
+      setTimeout(() => {
+        setTasks((prev) => [...prev, newTask]);
+        setIsDialogOpen(false);
+        setLoading(false);
+        reset();
+
+        toast.success("New task created successfully");
+      }, 700);
+    }
   };
 
   const handleDelete = async (taskId: string) => {
@@ -118,6 +144,16 @@ export default function Home() {
     });
   };
 
+  const handleEdit = (task: Task) => {
+    setEditingTask(task);
+    // Pre-fill form with task data
+    setValue("title", task.title);
+    setValue("project_name", task.project_name);
+    setValue("priority_level", task.priority_level);
+    setValue("status", task.status);
+    setIsDialogOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-zinc-50 font-sans dark:bg-black">
       <header>
@@ -131,7 +167,10 @@ export default function Home() {
           {/* Create */}
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="flex gap-2 items-center cursor-pointer ml-auto">
+              <Button
+                className="flex gap-2 items-center cursor-pointer ml-auto"
+                onClick={() => setEditingTask(null)}
+              >
                 <PlusIcon />
                 Create
               </Button>
@@ -140,8 +179,12 @@ export default function Home() {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <DialogHeader>
                   <DialogTitle className="text-sage font-bold">
-                    Create new task
+                    {editingTask ? "Edit Task" : "Create New Task"}
                   </DialogTitle>
+                  <DialogDescription className="hidden">
+                    Make changes to your profile here. Click save when
+                    you&apos;re done.
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 [&_label]:text-sage ">
                   <div className="grid gap-3">
@@ -253,7 +296,7 @@ export default function Home() {
                     {loading ? (
                       <LoaderCircleIcon className="animate-spin" />
                     ) : (
-                      "Add new"
+                      <span>{editingTask ? "Update" : "Add new"}</span>
                     )}
                   </Button>
                 </DialogFooter>
@@ -295,7 +338,12 @@ export default function Home() {
           {/* Tasks */}
           <div className="my-10 flex flex-col gap-3">
             {tasks.map((task) => (
-              <TaskCard key={task.task_id} {...task} onDelete={handleDelete} />
+              <TaskCard
+                key={task.task_id}
+                {...task}
+                onDelete={handleDelete}
+                onEdit={handleEdit}
+              />
             ))}
           </div>
         </div>
@@ -307,10 +355,18 @@ export default function Home() {
 
 interface TaskCardProp extends Task {
   onDelete: (taskId: string) => void;
+  onEdit: (task: Task) => void;
 }
 function TaskCard(props: TaskCardProp) {
-  const { task_id, title, project_name, priority_level, status, onDelete } =
-    props;
+  const {
+    task_id,
+    title,
+    project_name,
+    priority_level,
+    status,
+    onDelete,
+    onEdit,
+  } = props;
 
   return (
     <div className="bg-pale-green/80 shadow-md rounded-lg p-6 w-full relative space-y-5">
@@ -333,7 +389,9 @@ function TaskCard(props: TaskCardProp) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="font-sans">
-          <DropdownMenuItem>Edit</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onEdit(props)}>
+            Edit
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => onDelete(task_id)}
