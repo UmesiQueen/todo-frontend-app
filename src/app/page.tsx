@@ -47,6 +47,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Toaster } from "@/components/ui/sonner";
+import { AnalyzeButton } from "@/components/analyze-button";
 
 type TaskFormInput = {
   title: string;
@@ -55,7 +56,7 @@ type TaskFormInput = {
   status: "to-do" | "in-progress" | "done";
 };
 
-type Task = TaskFormInput & {
+export type Task = TaskFormInput & {
   task_id: string;
   created_at: Date;
   updated_at?: Date;
@@ -181,10 +182,12 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-dvh bg-zinc-50 font-sans dark:bg-black">
+    <div className="min-h-dvh bg-zinc-50 font-sans dark:bg-black relative">
       <header>
         <nav className="flex justify-between items-center gap-5 px-2 h-20 max-w-370 mx-auto">
-          <h1 className="text-2xl md:text-3xl font-bold text-sage">Sprint DashBoard</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-sage">
+            Sprint DashBoard
+          </h1>
           <ModeToggle />
         </nav>
       </header>
@@ -401,8 +404,9 @@ export default function Home() {
             )}
           </div>
         </div>
-        <Toaster />
+        <Toaster position="bottom-left" />
       </main>
+      <AnalyzeButton tasks={filteredTasks} />
     </div>
   );
 }
