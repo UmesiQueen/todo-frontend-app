@@ -2,12 +2,15 @@
 
 import * as React from "react";
 import { SparklesIcon, XIcon } from "lucide-react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+
 import { Button } from "@/components/ui/button";
 import { type Task } from "@/app/page";
 
 export function AnalyzeButton({ tasks }: { tasks: Task[] }) {
   const [result, setResult] = React.useState<string>("");
   const [loading, setLoading] = React.useState(false);
+    const [resultContainer] = useAutoAnimate();
 
   const handleClick = async () => {
     setLoading(true);
@@ -67,7 +70,7 @@ export function AnalyzeButton({ tasks }: { tasks: Task[] }) {
       </Button>
 
       {result && (
-        <div className="absolute right-5 bottom-15 z-2">
+        <div ref={resultContainer} className="absolute right-3 md:right-5 bottom-18 md:bottom-20 z-2">
           <div className="p-5 border rounded-md bg-sage/60 shadow-lg min-h-30 w-65 backdrop-blur-md relative">
             <Button
               size="icon"

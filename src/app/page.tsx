@@ -18,6 +18,7 @@ import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
 import { formatDistanceStrict } from "date-fns";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 import {
   DropdownMenu,
@@ -72,6 +73,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState("#");
   const [isPending, startTransition] = React.useTransition();
+  const [taskContainer] = useAutoAnimate();
 
   React.useEffect(() => {
     setTasks(JSON.parse(localStorage.getItem("tasks") ?? "[]"));
@@ -413,6 +415,7 @@ export default function Home() {
           </div>
           {/* Tasks */}
           <ul
+            ref={taskContainer}
             className={cn(
               "my-10 flex flex-col gap-3 transition-opacity duration-200",
               isPending ? "opacity-60" : "opacity-100"
