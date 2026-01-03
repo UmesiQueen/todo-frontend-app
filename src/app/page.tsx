@@ -146,7 +146,6 @@ export default function Home() {
 
   const handleEdit = (task: Task) => {
     setEditingTask(task);
-    // Pre-fill form with task data
     setValue("title", task.title);
     setValue("project_name", task.project_name);
     setValue("priority_level", task.priority_level);
@@ -165,11 +164,25 @@ export default function Home() {
       <main className="px-5 max-w-250 mx-auto">
         <div className="space-y-5">
           {/* Create */}
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog
+            open={isDialogOpen}
+            onOpenChange={(state) => {
+              setIsDialogOpen(state);
+              if (!state) {
+                setTimeout(() => {
+                  setEditingTask(null);
+                  reset();
+                }, 0);
+              }
+            }}
+          >
             <DialogTrigger asChild>
               <Button
                 className="flex gap-2 items-center cursor-pointer ml-auto"
-                onClick={() => setEditingTask(null)}
+                onClick={() => {
+                  setEditingTask(null);
+                  reset();
+                }}
               >
                 <PlusIcon />
                 Create
