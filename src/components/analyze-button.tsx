@@ -60,18 +60,21 @@ export function AnalyzeButton({ tasks }: { tasks: Task[] }) {
   };
 
   return (
-    <>
+    <div className="fixed bottom-0 right-0 z-50">
       <Button
         onClick={handleClick}
         disabled={loading || tasks.length === 0}
-        className="bg-[#3B4953] dark:bg-zinc-100 dark:hover:bg-white dark:text-sage hover:bg-[#3B4953]/80 cursor-pointer shadow-xl absolute bottom-3 md:bottom-5 right-3 md:right-5 z-1"
+        className="bg-[#3B4953] dark:bg-zinc-100 dark:hover:bg-white dark:text-sage hover:bg-[#3B4953]/80 cursor-pointer shadow-xl absolute right-3 bottom-3 z-1"
       >
         <SparklesIcon /> {loading ? "Analyzing..." : "Analyze My Day"}
       </Button>
 
       {result && (
-        <div ref={resultContainer} className="absolute right-3 md:right-5 bottom-18 md:bottom-20 z-2">
-          <div className="p-5 border rounded-md bg-sage/60 shadow-lg min-h-30 w-65 backdrop-blur-md relative">
+        <div
+          ref={resultContainer}
+          className="absolute right-3 bottom-13 z-2"
+        >
+          <div className="p-5 border rounded-md bg-sage/60 shadow-2xl min-h-30 w-70 backdrop-blur-md relative">
             <Button
               size="icon"
               variant="ghost"
@@ -87,6 +90,6 @@ export function AnalyzeButton({ tasks }: { tasks: Task[] }) {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

@@ -166,7 +166,7 @@ export default function Home() {
         return updatedTasks;
       });
 
-      return { message: "Task has been deleted!" };
+      return { message: "Task has been deleted" };
     };
 
     toast.promise(deleteTask(), {
@@ -200,7 +200,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-dvh font-sans relative space-y-5">
+    <div className="min-h-dvh font-sans space-y-5">
       <header className="shadow-xs border-b">
         <nav className="flex justify-between items-center gap-5 px-2 h-20 max-w-370 mx-auto">
           <h1 className="text-2xl md:text-3xl font-bold text-sage dark:text-zinc-200">
@@ -209,7 +209,7 @@ export default function Home() {
           <ModeToggle />
         </nav>
       </header>
-      <main className="px-5 max-w-250 mx-auto">
+      <main className="p-5 max-w-250 mx-auto my-0">
         <div className="space-y-5">
           {/* Create */}
           <Dialog
@@ -355,9 +355,9 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                <DialogFooter>
+                <DialogFooter className="flex flex-col-reverse! md:flex-row!">
                   <DialogClose asChild>
-                    <Button variant="outline">Cancel</Button>
+                    <Button variant="outline" className="w-full md:w-20">Cancel</Button>
                   </DialogClose>
                   <Button
                     type="submit"
@@ -390,18 +390,18 @@ export default function Home() {
             </div>
             <Separator
               orientation="vertical"
-              className="h-6! bg-sage hidden md:block"
+              className="h-8! bg-sage hidden md:block"
             />
             {/* Filter */}
-            <div className="flex items-center w-fit border border-sage font-medium rounded-lg bg-sage">
-              <span className="px-3 text-[13px] font-semibold h-full text-white">
+            <div className="h-10 flex items-center w-fit border border-sage font-medium rounded-lg overflow-hidden bg-sage">
+              <span className="px-3 text-[13px] font-semibold h-fit text-white ">
                 Filter by Status
               </span>
               <Select
                 value={statusFilter}
                 onValueChange={handleStatusFilterChange}
               >
-                <SelectTrigger className="w-36 grow rounded-none rounded-r-lg border-0 border-l border-sage px-5 focus:ring-0 focus:ring-offset-0 bg-white dark:bg-white text-zinc-700 dark:hover:bg-zinc-200">
+                <SelectTrigger className="w-36 h-10! grow rounded-none rounded-r-lg border-0 border-l border-sage px-5 focus:ring-0 focus:ring-offset-0 bg-white dark:bg-white text-zinc-700 dark:hover:bg-zinc-200">
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
                 <SelectContent className="font-sans">
@@ -436,7 +436,7 @@ export default function Home() {
                 {searchQuery || statusFilter !== "#" ? (
                   <div className="flex flex-col items-center gap-5 justify-center">
                     <SearchXIcon size={30} />
-                    <p>No tasks found matching your filters.</p>
+                    <p>No tasks found matching your filter(s).</p>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center gap-5 justify-center">
@@ -448,8 +448,8 @@ export default function Home() {
             )}
           </ul>
         </div>
-        <Toaster position="bottom-left" />
       </main>
+      <Toaster position="bottom-left" />
       <AnalyzeButton tasks={filteredTasks} />
     </div>
   );
