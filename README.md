@@ -2,11 +2,13 @@
 
 An AI-Powered Sprint Dashboard. This a productivity tool designed to help developers track their tasks while leveraging AI to analyze their efficiency.
 
+Frontend assessment task
+
 Live url [here](https://sprint-ai-xi.vercel.app/)
 
 ## Features
 
-- **Manage Task**:  Create, Read, Update, and Delete (CRUD) tasks
+- **Manage Tasks**:  Create, Read, Update, and Delete (CRUD) tasks
 - **Filter & Search**: Filter tasks by status and search for specific tasks by title
 - **AI Productivity Insights**: Get summary of your current workload and suggest a "priority focus"
 
