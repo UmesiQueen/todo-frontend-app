@@ -14,6 +14,7 @@ import {
 import { ModeToggle } from "@/components/toggle-theme";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
+import { toast } from "sonner";
 
 import {
   DropdownMenu,
@@ -43,6 +44,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Toaster } from "@/components/ui/sonner";
 
 type TaskFormInput = {
   title: string;
@@ -91,7 +93,29 @@ export default function Home() {
       setIsDialogOpen(false);
       setLoading(false);
       reset();
-    }, 500);
+    }, 700);
+  };
+
+  const handleDelete = async (taskId: string) => {
+    const deleteTask = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 700));
+
+      setTasks((prevTasks) => {
+        const updatedTasks = prevTasks.filter(
+          (task) => task.task_id !== taskId
+        );
+        localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+        return updatedTasks;
+      });
+
+      return { message: "Task has been deleted!" };
+    };
+
+    toast.promise(deleteTask(), {
+      loading: "Deleting...",
+      success: (data) => `${data.message}`,
+      error: "Error occurred",
+    });
   };
 
   return (
@@ -226,7 +250,11 @@ export default function Home() {
                     <Button variant="outline">Cancel</Button>
                   </DialogClose>
                   <Button type="submit" disabled={loading} className="w-20">
-                    {loading ? <LoaderCircleIcon className="animate-spin" /> : "Add new"}
+                    {loading ? (
+                      <LoaderCircleIcon className="animate-spin" />
+                    ) : (
+                      "Add new"
+                    )}
                   </Button>
                 </DialogFooter>
               </form>
@@ -267,16 +295,23 @@ export default function Home() {
           {/* Tasks */}
           <div className="my-10 flex flex-col gap-3">
             {tasks.map((task) => (
-              <TaskCard key={task.task_id} {...task} />
+              <TaskCard key={task.task_id} {...task} onDelete={handleDelete} />
             ))}
           </div>
         </div>
+        <Toaster />
       </main>
     </div>
   );
 }
 
-function TaskCard({ title, project_name, priority_level, status }: Task) {
+interface TaskCardProp extends Task {
+  onDelete: (taskId: string) => void;
+}
+function TaskCard(props: TaskCardProp) {
+  const { task_id, title, project_name, priority_level, status, onDelete } =
+    props;
+
   return (
     <div className="bg-pale-green/80 shadow-md rounded-lg p-6 w-full relative space-y-5">
       <div>
@@ -300,7 +335,12 @@ function TaskCard({ title, project_name, priority_level, status }: Task) {
         <DropdownMenuContent className="font-sans">
           <DropdownMenuItem>Edit</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-red-500">Delete</DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => onDelete(task_id)}
+            className="text-red-500"
+          >
+            Delete
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <div className="flex items-center gap-2">
