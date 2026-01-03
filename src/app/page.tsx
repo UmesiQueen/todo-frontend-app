@@ -15,6 +15,7 @@ import { ModeToggle } from "@/components/toggle-theme";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
+import { formatDistanceStrict } from "date-fns";
 
 import {
   DropdownMenu,
@@ -417,6 +418,7 @@ function TaskCard(props: TaskCardProp) {
     project_name,
     priority_level,
     status,
+    created_at,
     onDelete,
     onEdit,
   } = props;
@@ -426,8 +428,18 @@ function TaskCard(props: TaskCardProp) {
       <div>
         <h3 className="text-xl font-semibold text-sage">{title}</h3>
         <p className="text-sm inline-flex items-center">
-          <span className="uppercase">{project_name}</span>{" "}
-          <DotIcon size={20} /> Created 2 mins ago
+          <span className="uppercase">{project_name}</span>
+          <DotIcon size={20} />
+          <span>
+            {props?.updated_at ? "Updated" : "Created"}{" "}
+            {formatDistanceStrict(
+              new Date(props?.updated_at ?? created_at),
+              new Date(),
+              {
+                addSuffix: true,
+              }
+            )}
+          </span>
         </p>
       </div>
       <DropdownMenu>
