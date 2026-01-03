@@ -474,7 +474,7 @@ function TaskCard(props: TaskCardProp) {
   return (
     <div className="bg-pale-green dark:bg-pale-green/80 shadow-md rounded-lg p-6 w-full relative space-y-5">
       <div>
-        <h2 className="text-xl font-semibold text-sage">{title}</h2>
+        <h2 className="text-xl font-semibold text-sage capitalize">{title}</h2>
         <p className="text-sm inline-flex items-center text-black">
           <span className="uppercase">{project_name}</span>
           <DotIcon size={20} />
