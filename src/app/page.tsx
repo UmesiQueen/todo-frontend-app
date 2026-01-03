@@ -65,6 +65,9 @@ export default function Home() {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [editingTask, setEditingTask] = React.useState<Task | null>(null);
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState("#");
+  const [filteredTasks, setFilteredTasks] = React.useState<Task[]>(tasks);
 
   React.useEffect(() => {
     setTasks(JSON.parse(localStorage.getItem("tasks") ?? "[]"));
@@ -73,6 +76,29 @@ export default function Home() {
   React.useEffect(() => {
     if (tasks.length > 0) localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
+
+  // Debounced filter effect
+  React.useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      let filtered = tasks;
+
+      // search filter
+      if (searchQuery) {
+        filtered = tasks.filter((task) =>
+          task.title.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
+
+      // status filter
+      if (statusFilter !== "#") {
+        filtered = filtered.filter((task) => task.status === statusFilter);
+      }
+
+      setFilteredTasks(filtered);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, statusFilter, tasks]);
 
   const {
     register,
@@ -325,6 +351,8 @@ export default function Home() {
                 type="text"
                 className="bg-transparent w-full focus:outline-none py-1"
                 placeholder="Search by title..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
               <span className="sr-only">Search bar</span>
             </div>
@@ -332,10 +360,14 @@ export default function Home() {
             {/* Filter */}
             <div className="flex items-center w-fit border border-sage font-medium rounded-lg bg-sage">
               <span className="px-3 text-[13px] font-semibold h-full text-white">
-                {/* <ListFilterIcon size={15} /> */}
                 Filter by Status
               </span>
-              <Select>
+              <Select
+                value={statusFilter}
+                onValueChange={(value) => {
+                  setStatusFilter(value);
+                }}
+              >
                 <SelectTrigger className="w-36 grow rounded-none rounded-r-lg border-0 border-l border-sage px-5 focus:ring-0 focus:ring-offset-0 bg-white">
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
@@ -350,14 +382,22 @@ export default function Home() {
           </div>
           {/* Tasks */}
           <div className="my-10 flex flex-col gap-3">
-            {tasks.map((task) => (
-              <TaskCard
-                key={task.task_id}
-                {...task}
-                onDelete={handleDelete}
-                onEdit={handleEdit}
-              />
-            ))}
+            {filteredTasks.length > 0 ? (
+              filteredTasks.map((task) => (
+                <TaskCard
+                  key={task.task_id}
+                  {...task}
+                  onDelete={handleDelete}
+                  onEdit={handleEdit}
+                />
+              ))
+            ) : (
+              <div className="text-center py-10 text-gray-500">
+                {searchQuery
+                  ? "No tasks found matching your search"
+                  : "No tasks yet"}
+              </div>
+            )}
           </div>
         </div>
         <Toaster />
