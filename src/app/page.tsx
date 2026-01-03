@@ -71,7 +71,7 @@ export default function Home() {
   const [editingTask, setEditingTask] = React.useState<Task | null>(null);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState("#");
-  const [filteredTasks, setFilteredTasks] = React.useState<Task[]>(tasks);
+  const [isPending, startTransition] = React.useTransition();
 
   React.useEffect(() => {
     setTasks(JSON.parse(localStorage.getItem("tasks") ?? "[]"));
@@ -81,28 +81,28 @@ export default function Home() {
     if (tasks.length > 0) localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
 
-  // Debounced filter effect
-  React.useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      let filtered = tasks;
+  const filteredTasks = React.useMemo(() => {
+    let filtered = tasks;
 
-      // search filter
-      if (searchQuery) {
-        filtered = tasks.filter((task) =>
-          task.title.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }
+    // search filter
+    if (searchQuery) {
+      filtered = filtered.filter((task) =>
+        task.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
 
-      // status filter
-      if (statusFilter !== "#") {
-        filtered = filtered.filter((task) => task.status === statusFilter);
-      }
+    // status filter
+    if (statusFilter !== "#") {
+      filtered = filtered.filter((task) => task.status === statusFilter);
+    }
 
-      setFilteredTasks(filtered);
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery, statusFilter, tasks]);
+    // Sort by most recent
+    return [...filtered].sort((a, b) => {
+      const dateA = new Date(a.updated_at || a.created_at);
+      const dateB = new Date(b.updated_at || b.created_at);
+      return dateB.getTime() - dateA.getTime();
+    });
+  }, [tasks, searchQuery, statusFilter]);
 
   const {
     register,
@@ -181,6 +181,20 @@ export default function Home() {
     setValue("priority_level", task.priority_level);
     setValue("status", task.status);
     setIsDialogOpen(true);
+  };
+
+  // Handle search with transition
+  const handleSearchChange = (query: string) => {
+    startTransition(() => {
+      setSearchQuery(query);
+    });
+  };
+
+  // Handle status filter with transition
+  const handleStatusFilterChange = (value: string) => {
+    startTransition(() => {
+      setStatusFilter(value);
+    });
   };
 
   return (
@@ -368,7 +382,7 @@ export default function Home() {
                 className="bg-transparent w-full focus:outline-none py-1 placeholder:text-zinc-400 text-zinc-900"
                 placeholder="Search by title..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
               />
               <span className="sr-only">Search bar</span>
             </div>
@@ -383,9 +397,7 @@ export default function Home() {
               </span>
               <Select
                 value={statusFilter}
-                onValueChange={(value) => {
-                  setStatusFilter(value);
-                }}
+                onValueChange={handleStatusFilterChange}
               >
                 <SelectTrigger className="w-36 grow rounded-none rounded-r-lg border-0 border-l border-sage px-5 focus:ring-0 focus:ring-offset-0 bg-white dark:bg-white text-zinc-700 dark:hover:bg-zinc-200">
                   <SelectValue placeholder="All" />
@@ -400,22 +412,28 @@ export default function Home() {
             </div>
           </div>
           {/* Tasks */}
-          <div className="my-10 flex flex-col gap-3">
+          <ul
+            className={cn(
+              "my-10 flex flex-col gap-3 transition-opacity duration-200",
+              isPending ? "opacity-60" : "opacity-100"
+            )}
+          >
             {filteredTasks.length > 0 ? (
               filteredTasks.map((task) => (
-                <TaskCard
-                  key={task.task_id}
-                  {...task}
-                  onDelete={handleDelete}
-                  onEdit={handleEdit}
-                />
+                <li key={task.task_id}>
+                  <TaskCard
+                    {...task}
+                    onDelete={handleDelete}
+                    onEdit={handleEdit}
+                  />
+                </li>
               ))
             ) : (
               <div className="text-center py-10 text-gray-500 dark:text-zinc-300">
-                {searchQuery ? (
+                {searchQuery || statusFilter !== "#" ? (
                   <div className="flex flex-col items-center gap-5 justify-center">
                     <SearchXIcon size={30} />
-                    <p>No tasks found matching your search.</p>
+                    <p>No tasks found matching your filters.</p>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center gap-5 justify-center">
@@ -425,7 +443,7 @@ export default function Home() {
                 )}
               </div>
             )}
-          </div>
+          </ul>
         </div>
         <Toaster position="bottom-left" />
       </main>
@@ -451,10 +469,10 @@ function TaskCard(props: TaskCardProp) {
   } = props;
 
   return (
-    <div className="bg-pale-green/80 shadow-md rounded-lg p-6 w-full relative space-y-5">
+    <div className="bg-pale-green dark:bg-pale-green/80 shadow-md rounded-lg p-6 w-full relative space-y-5">
       <div>
         <h2 className="text-xl font-semibold text-sage">{title}</h2>
-        <p className="text-sm inline-flex items-center">
+        <p className="text-sm inline-flex items-center text-black">
           <span className="uppercase">{project_name}</span>
           <DotIcon size={20} />
           <span>
