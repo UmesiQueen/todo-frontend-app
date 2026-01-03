@@ -181,10 +181,10 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans dark:bg-black">
+    <div className="min-h-dvh bg-zinc-50 font-sans dark:bg-black">
       <header>
         <nav className="flex justify-between items-center gap-5 px-2 h-20 max-w-370 mx-auto">
-          <h1 className="text-3xl font-bold text-sage">Sprint DashBoard</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-sage">Sprint DashBoard</h1>
           <ModeToggle />
         </nav>
       </header>
@@ -264,7 +264,7 @@ export default function Home() {
                       </p>
                     )}
                   </div>
-                  <div className="md:flex gap-3">
+                  <div className="flex flex-col md:flex-row gap-y-5 gap-x-3 ">
                     {/* Priority Level */}
                     <div className="grid gap-3">
                       <Label htmlFor="priority_level">Priority Level</Label>
@@ -277,7 +277,7 @@ export default function Home() {
                             onValueChange={field.onChange}
                             value={field.value}
                           >
-                            <SelectTrigger id="priority_level" className="w-45">
+                            <SelectTrigger id="priority_level" className="w-full md:w-45">
                               <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent className="font-sans">
@@ -307,7 +307,7 @@ export default function Home() {
                             onValueChange={field.onChange}
                             value={field.value}
                           >
-                            <SelectTrigger id="status" className="w-45">
+                            <SelectTrigger id="status" className="w-full md:w-45">
                               <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent className="font-sans">
@@ -332,7 +332,7 @@ export default function Home() {
                   <DialogClose asChild>
                     <Button variant="outline">Cancel</Button>
                   </DialogClose>
-                  <Button type="submit" disabled={loading} className="w-20">
+                  <Button type="submit" disabled={loading} className="w-full md:w-20">
                     {loading ? (
                       <LoaderCircleIcon className="animate-spin" />
                     ) : (
@@ -344,9 +344,9 @@ export default function Home() {
             </DialogContent>
           </Dialog>
 
-          <div className="flex gap-x-8 items-center h-10">
+          <div className="flex flex-col md:flex-row gap-x-8 gap-y-5 md:items-center">
             {/* Search Bar*/}
-            <div className="h-10 w-85 bg-white p-3 border border-sage font-sans rounded-lg font-normal text-sm flex items-center gap-2">
+            <div className="h-10 w-full md:w-85 bg-white p-3 border border-sage font-sans rounded-lg font-normal text-sm flex items-center gap-2">
               <SearchIcon size={18} color="#5A7863" />
               <input
                 type="text"
@@ -357,7 +357,7 @@ export default function Home() {
               />
               <span className="sr-only">Search bar</span>
             </div>
-            <Separator orientation="vertical" className="h-6! bg-sage" />
+            <Separator orientation="vertical" className="h-6! bg-sage hidden md:block" />
             {/* Filter */}
             <div className="flex items-center w-fit border border-sage font-medium rounded-lg bg-sage">
               <span className="px-3 text-[13px] font-semibold h-full text-white">
