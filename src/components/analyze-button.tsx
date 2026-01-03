@@ -61,7 +61,7 @@ export function AnalyzeButton({ tasks }: { tasks: Task[] }) {
       <Button
         onClick={handleClick}
         disabled={loading || tasks.length === 0}
-        className="bg-[#3B4953] hover:bg-[#3B4953]/80 cursor-pointer shadow-xl absolute bottom-5 right-5 z-1"
+        className="bg-[#3B4953] dark:bg-zinc-100 dark:hover:bg-white dark:text-sage hover:bg-[#3B4953]/80 cursor-pointer shadow-xl absolute bottom-3 md:bottom-5 right-3 md:right-5 z-1"
       >
         <SparklesIcon /> {loading ? "Analyzing..." : "Analyze My Day"}
       </Button>

@@ -182,11 +182,11 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-dvh bg-zinc-50 font-sans dark:bg-black relative">
+    <div className="min-h-dvh font-sans relative">
       <header>
         <nav className="flex justify-between items-center gap-5 px-2 h-20 max-w-370 mx-auto">
-          <h1 className="text-2xl md:text-3xl font-bold text-sage">
-            Sprint DashBoard
+          <h1 className="text-2xl md:text-3xl font-bold text-sage dark:text-zinc-200">
+            Sprint Dashboard
           </h1>
           <ModeToggle />
         </nav>
@@ -221,7 +221,7 @@ export default function Home() {
             <DialogContent className="sm:max-w-106.25 font-sans">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <DialogHeader>
-                  <DialogTitle className="text-sage font-bold">
+                  <DialogTitle className="text-sage dark:text-zinc-200 font-bold">
                     {editingTask ? "Edit Task" : "Create New Task"}
                   </DialogTitle>
                   <DialogDescription className="hidden">
@@ -229,7 +229,7 @@ export default function Home() {
                     you&apos;re done.
                   </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 [&_label]:text-sage ">
+                <div className="grid gap-4 [&_label]:text-sage dark:[&_label]:text-zinc-200 ">
                   <div className="grid gap-3">
                     <Label htmlFor="title">Title</Label>
                     <Input
@@ -280,7 +280,10 @@ export default function Home() {
                             onValueChange={field.onChange}
                             value={field.value}
                           >
-                            <SelectTrigger id="priority_level" className="w-full md:w-45">
+                            <SelectTrigger
+                              id="priority_level"
+                              className="w-full md:w-45"
+                            >
                               <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent className="font-sans">
@@ -310,7 +313,10 @@ export default function Home() {
                             onValueChange={field.onChange}
                             value={field.value}
                           >
-                            <SelectTrigger id="status" className="w-full md:w-45">
+                            <SelectTrigger
+                              id="status"
+                              className="w-full md:w-45"
+                            >
                               <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent className="font-sans">
@@ -335,7 +341,11 @@ export default function Home() {
                   <DialogClose asChild>
                     <Button variant="outline">Cancel</Button>
                   </DialogClose>
-                  <Button type="submit" disabled={loading} className="w-full md:w-20">
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full md:w-20"
+                  >
                     {loading ? (
                       <LoaderCircleIcon className="animate-spin" />
                     ) : (
@@ -353,14 +363,17 @@ export default function Home() {
               <SearchIcon size={18} color="#5A7863" />
               <input
                 type="text"
-                className="bg-transparent w-full focus:outline-none py-1"
+                className="bg-transparent w-full focus:outline-none py-1 placeholder:text-zinc-400 text-zinc-900"
                 placeholder="Search by title..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
               <span className="sr-only">Search bar</span>
             </div>
-            <Separator orientation="vertical" className="h-6! bg-sage hidden md:block" />
+            <Separator
+              orientation="vertical"
+              className="h-6! bg-sage hidden md:block"
+            />
             {/* Filter */}
             <div className="flex items-center w-fit border border-sage font-medium rounded-lg bg-sage">
               <span className="px-3 text-[13px] font-semibold h-full text-white">
@@ -372,7 +385,7 @@ export default function Home() {
                   setStatusFilter(value);
                 }}
               >
-                <SelectTrigger className="w-36 grow rounded-none rounded-r-lg border-0 border-l border-sage px-5 focus:ring-0 focus:ring-offset-0 bg-white">
+                <SelectTrigger className="w-36 grow rounded-none rounded-r-lg border-0 border-l border-sage px-5 focus:ring-0 focus:ring-offset-0 bg-white dark:bg-white text-zinc-700 dark:hover:bg-zinc-200">
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
                 <SelectContent className="font-sans">
@@ -463,8 +476,8 @@ function TaskCard(props: TaskCardProp) {
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
+            variant="destructive"
             onClick={() => onDelete(task_id)}
-            className="text-red-500"
           >
             Delete
           </DropdownMenuItem>
