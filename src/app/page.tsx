@@ -10,6 +10,8 @@ import {
   PlusIcon,
   SearchIcon,
   LoaderCircleIcon,
+  ClipboardPlusIcon,
+  SearchXIcon,
 } from "lucide-react";
 import { ModeToggle } from "@/components/toggle-theme";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
@@ -182,8 +184,8 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-dvh font-sans relative">
-      <header>
+    <div className="min-h-dvh font-sans relative space-y-5">
+      <header className="shadow-xs border-b">
         <nav className="flex justify-between items-center gap-5 px-2 h-20 max-w-370 mx-auto">
           <h1 className="text-2xl md:text-3xl font-bold text-sage dark:text-zinc-200">
             Sprint Dashboard
@@ -409,10 +411,18 @@ export default function Home() {
                 />
               ))
             ) : (
-              <div className="text-center py-10 text-gray-500">
-                {searchQuery
-                  ? "No tasks found matching your search"
-                  : "No tasks yet"}
+              <div className="text-center py-10 text-gray-500 dark:text-zinc-300">
+                {searchQuery ? (
+                  <div className="flex flex-col items-center gap-5 justify-center">
+                    <SearchXIcon size={30} />
+                    <p>No tasks found matching your search.</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-5 justify-center">
+                    <ClipboardPlusIcon size={30} />
+                    <p>All clear! Add a task to begin tracking.</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -443,7 +453,7 @@ function TaskCard(props: TaskCardProp) {
   return (
     <div className="bg-pale-green/80 shadow-md rounded-lg p-6 w-full relative space-y-5">
       <div>
-        <h3 className="text-xl font-semibold text-sage">{title}</h3>
+        <h2 className="text-xl font-semibold text-sage">{title}</h2>
         <p className="text-sm inline-flex items-center">
           <span className="uppercase">{project_name}</span>
           <DotIcon size={20} />
