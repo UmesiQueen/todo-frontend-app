@@ -3,6 +3,7 @@
 import * as React from "react";
 import { SparklesIcon, XIcon } from "lucide-react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { type Task } from "@/app/page";
@@ -10,7 +11,7 @@ import { type Task } from "@/app/page";
 export function AnalyzeButton({ tasks }: { tasks: Task[] }) {
   const [result, setResult] = React.useState<string>("");
   const [loading, setLoading] = React.useState(false);
-    const [resultContainer] = useAutoAnimate();
+  const [resultContainer] = useAutoAnimate();
 
   const handleClick = async () => {
     setLoading(true);
@@ -23,38 +24,29 @@ export function AnalyzeButton({ tasks }: { tasks: Task[] }) {
         body: JSON.stringify({ tasks }),
       });
 
-      if (!response.body) {
-        throw new Error("No response body");
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value);
-        const lines = chunk.split("\n");
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(6);
-            if (data === "[DONE]") {
-              setLoading(false);
-              break;
-            }
-            try {
-              const parsed = JSON.parse(data);
-              setResult((prev) => prev + parsed.text);
-            } catch (e) {
-              console.log(e, "Error");
-            }
-          }
+      if (!response.ok) {
+        let errorMessage = "Failed to fetch response";
+        try {
+          const data = await response.json();
+          errorMessage = data.error || errorMessage;
+        } catch {
+          errorMessage = `Request failed with status ${response.status}`;
         }
+        throw new Error(errorMessage);
       }
+
+      const data = await response.json();
+      setResult(data.text);
     } catch (error) {
-      console.error("Error:", error);
+      let errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+
+      if (errorMessage.includes(":")) {
+        errorMessage = errorMessage.split(":").slice(1).join(":").trim();
+      }
+
+      toast.error(errorMessage);
+    } finally {
       setLoading(false);
     }
   };
@@ -70,16 +62,14 @@ export function AnalyzeButton({ tasks }: { tasks: Task[] }) {
       </Button>
 
       {result && (
-        <div
-          ref={resultContainer}
-          className="absolute right-3 bottom-13 z-2"
-        >
+        <div ref={resultContainer} className="absolute right-3 bottom-13 z-2">
           <div className="p-5 border rounded-md bg-sage/60 shadow-2xl min-h-30 w-70 backdrop-blur-md relative">
             <Button
               size="icon"
               variant="ghost"
               className="absolute top-0 right-0"
               onClick={() => setResult("")}
+              aria-label="Close analysis"
             >
               <XIcon />
             </Button>
