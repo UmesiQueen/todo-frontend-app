@@ -72,7 +72,6 @@ export default function Home() {
   const [editingTask, setEditingTask] = React.useState<Task | null>(null);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState("#");
-  const [isPending, startTransition] = React.useTransition();
   const [taskContainer] = useAutoAnimate();
 
   React.useEffect(() => {
@@ -185,19 +184,6 @@ export default function Home() {
     setIsDialogOpen(true);
   };
 
-  // Handle search with transition
-  const handleSearchChange = (query: string) => {
-    startTransition(() => {
-      setSearchQuery(query);
-    });
-  };
-
-  // Handle status filter with transition
-  const handleStatusFilterChange = (value: string) => {
-    startTransition(() => {
-      setStatusFilter(value);
-    });
-  };
 
   return (
     <div className="min-h-dvh font-sans space-y-5">
@@ -357,7 +343,9 @@ export default function Home() {
                 </div>
                 <DialogFooter className="flex flex-col-reverse! md:flex-row!">
                   <DialogClose asChild>
-                    <Button variant="outline" className="w-full md:w-20">Cancel</Button>
+                    <Button variant="outline" className="w-full md:w-20">
+                      Cancel
+                    </Button>
                   </DialogClose>
                   <Button
                     type="submit"
@@ -384,7 +372,7 @@ export default function Home() {
                 className="bg-transparent w-full focus:outline-none py-1 placeholder:text-zinc-400 text-zinc-900"
                 placeholder="Search by title..."
                 value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
               <span className="sr-only">Search bar</span>
             </div>
@@ -399,7 +387,7 @@ export default function Home() {
               </span>
               <Select
                 value={statusFilter}
-                onValueChange={handleStatusFilterChange}
+                onValueChange={(value) => setStatusFilter(value)}
               >
                 <SelectTrigger className="w-36 h-10! grow rounded-none rounded-r-lg border-0 border-l border-sage px-5 focus:ring-0 focus:ring-offset-0 bg-white dark:bg-white text-zinc-700 dark:hover:bg-zinc-200">
                   <SelectValue placeholder="All" />
@@ -416,10 +404,7 @@ export default function Home() {
           {/* Tasks */}
           <ul
             ref={taskContainer}
-            className={cn(
-              "my-10 flex flex-col gap-3 transition-opacity duration-200",
-              isPending ? "opacity-60" : "opacity-100"
-            )}
+            className="my-10 flex flex-col gap-3 transition-opacity duration-200"
           >
             {filteredTasks.length > 0 ? (
               filteredTasks.map((task) => (
